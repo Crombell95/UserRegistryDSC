@@ -4,7 +4,7 @@
     RootModule = 'UserRegistryDSC.psm1'
     
     # Version number of this module.
-    ModuleVersion = '0.1.0'
+    ModuleVersion = '0.1.1'
     
     # ID used to uniquely identify this module
     GUID = '40493cb6-0390-4515-a8da-ae005f1d43c7'
