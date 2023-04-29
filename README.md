@@ -2,6 +2,9 @@
 # UserRegistryDSC
 This module contains a custom DSC resource for configuring user registry settings. Normally the DSC configuration will only change the HKCU setting under the SYSTEM account. This resource works around this limitation by enumerating all registered users from the ProfileList and sets the value in each HKU.
 
+## Changelog
+For an overview of what has been changed, please refer to the [Changelog](https://github.com/Crombell95/UserRegistryDSC/blob/main/CHANGELOG.md).
+
 ## DSC Resources
 
 ### UserRegistry
