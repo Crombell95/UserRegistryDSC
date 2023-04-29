@@ -80,7 +80,7 @@ function Test-UserRegistry {
 
         [Parameter(Mandatory)][string]$ValueName,
 
-        [Parameter(Mandatory)][int]$ValueData
+        [Parameter(Mandatory)][string]$ValueData
     )
 
     $get = Get-UserRegistry -Key $this.Key -ValueName $this.ValueName
@@ -121,7 +121,7 @@ function Set-UserRegistry {
 
         [Parameter(Mandatory)][string]$ValueType,
 
-        [Parameter(Mandatory)][int]$ValueData
+        [Parameter(Mandatory)][string]$ValueData
     )
 
     $get = Get-UserRegistry -Key $this.Key -ValueName $this.ValueName
@@ -142,8 +142,8 @@ function Set-UserRegistry {
         }
 
         try {
-            Write-Verbose -Message "Changing Value for $(Join-Path -Path $UserKey -ChildPath $ValueName) from $($UserProfile.Value) to $ValueData"
-            Set-Itemproperty -Path $UserKey -Name $ValueName -Value $ValueData -Force -ErrorAction Stop | Out-Null
+            Write-Verbose -Message "Changing Value for $(Join-Path -Path $UserKey -ChildPath $ValueName) from $($UserProfile.ValueData) to $ValueData"
+            Set-Itemproperty -Path $UserKey -Name $ValueName -Value $ValueData -Type $ValueType -Force -ErrorAction Stop | Out-Null
         }
         catch {
             Write-Verbose -Message "Creating $(Join-Path -Path $Key -ChildPath $ValueName) with value $ValueData"
@@ -179,7 +179,7 @@ class UserRegistry {
     [string]$ValueType
 
     [DSCProperty(Mandatory)]
-    [int]$ValueData
+    [string]$ValueData
 
     [DSCProperty(NotConfigurable)]
     [string]$SID
@@ -189,7 +189,24 @@ class UserRegistry {
 
     [UserRegistry] Get () {
         $get = Get-UserRegistry -Key $this.Key -ValueName $this.ValueName
-        return $get
+
+        # The get method cannot return an array of UserReistry objects as UserRegistry object
+        # This return construction is to ensure the get method shows if all keys are in desired state or not
+        # If not, the value of the first item not in desired state is shown
+        if (($get.ValueData | Select-Object -Unique) -ne $this.ValueData) {
+            return [UserRegistry]@{
+                UserHive = ''
+                SID      = ''
+                ValueData = $($get.ValueData | Where-Object {$_ -ne $this.ValueData})[0]
+            }
+        }
+        else {
+            return [UserRegistry]@{
+                UserHive = ''
+                SID      = ''
+                ValueData = $($get.ValueData | Select-Object -Unique)
+            }
+        }
     }
 
     [void] Set () {
